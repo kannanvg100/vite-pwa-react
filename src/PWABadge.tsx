@@ -38,7 +38,7 @@ function PWABadge() {
             New content available, click on reload button to update.
           </span>
 
-          <div className="PWABadge-buttons">
+          <div className="space-y-4">
             {needRefresh && (
               <button
                 className="PWABadge-toast-button"
