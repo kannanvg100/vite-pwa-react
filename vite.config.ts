@@ -6,12 +6,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react(), VitePWA({
     registerType: 'prompt',
-    injectRegister: false,
-
-    pwaAssets: {
-      disabled: false,
-      config: true,
-    },
 
     manifest: {
       name: 'vite-pwa',
@@ -21,9 +15,13 @@ export default defineConfig({
     },
 
     workbox: {
-      globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
-      cleanupOutdatedCaches: true,
+      globPatterns: [
+        '**/*.{js,css,html,ico,png,svg,json,ttf,woff,woff2,jpg,jpeg,gif,webp}',
+      ],
+      maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+      skipWaiting: true,
       clientsClaim: true,
+      cleanupOutdatedCaches: true,
     },
 
     devOptions: {
