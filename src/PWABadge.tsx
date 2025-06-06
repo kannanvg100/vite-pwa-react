@@ -1,4 +1,4 @@
-import './PWABadge.css'
+// import './PWABadge.css'
 
 import { useRegisterSW } from "virtual:pwa-register/react";
 
@@ -30,7 +30,7 @@ function PWABadge() {
   }
 
   return (
-    <div className="" role="alert" aria-labelledby="toast-message">
+    <div className="mt-4" role="alert" aria-labelledby="toast-message">
       {offlineReady && <p>offlineReady</p>}
       {needRefresh && <p>needRefresh</p>}
       {offlineReady || needRefresh ? (
