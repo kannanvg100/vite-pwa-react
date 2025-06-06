@@ -1,10 +1,8 @@
-// import './PWABadge.css'
-
 import { useRegisterSW } from "virtual:pwa-register/react";
 
 function PWABadge() {
-  // check for updates every hour
-  const period = 30;
+  // Check for updates every 30 seconds (for testing)
+  const period = 20 * 1000; // 30 seconds
 
   const {
     offlineReady: [offlineReady, setOfflineReady],
@@ -12,6 +10,9 @@ function PWABadge() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(swUrl, r) {
+      console.log('SW registered with URL:', swUrl);
+      console.log('Registration:', r);
+      
       if (period <= 0) return;
       if (r?.active?.state === "activated") {
         registerPeriodicSync(period, swUrl, r);
@@ -22,6 +23,12 @@ function PWABadge() {
         });
       }
     },
+    onNeedRefresh() {
+      console.log('Need refresh callback triggered');
+    },
+    onOfflineReady() {
+      console.log('Offline ready callback triggered');
+    }
   });
 
   function close() {
@@ -29,29 +36,58 @@ function PWABadge() {
     setNeedRefresh(false);
   }
 
+  // Handle reload with debug logging
+  const handleReload = async () => {
+    console.log('Reload button clicked');
+    console.log('updateServiceWorker function:', updateServiceWorker);
+    
+    try {
+      console.log('Calling updateServiceWorker...');
+      await updateServiceWorker(true);
+      console.log('updateServiceWorker completed');
+    } catch (error) {
+      console.error('Failed to update service worker:', error);
+      console.log('Falling back to window.location.reload()');
+      // Fallback to manual reload
+      window.location.reload();
+    }
+  };
+
   return (
     <div className="mt-4" role="alert" aria-labelledby="toast-message">
-      {offlineReady && <p>offlineReady ready</p>}
+      {offlineReady && (
+        <div className="p-4 mb-4 bg-green-100 border border-green-200 rounded">
+          <p className="text-green-800">App is ready to work offline!</p>
+          <button 
+            className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            onClick={close}
+          >
+            Close
+          </button>
+        </div>
+      )}
+      
       {needRefresh && (
-        <>
-          <span id="toast-message">
+        <div className="p-4 mb-4 bg-blue-100 border border-blue-200 rounded">
+          <span id="toast-message" className="block mb-3 text-blue-800">
             New content available, click on reload button to update.
           </span>
 
-          <div className="space-y-4">
-            {needRefresh && (
-              <button
-                className="PWABadge-toast-button"
-                onClick={() => updateServiceWorker(true)}
-              >
-                Reload
-              </button>
-            )}
-            <button className="PWABadge-toast-button" onClick={() => close()}>
+          <div className="space-x-2">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              onClick={handleReload}
+            >
+              Reload
+            </button>
+            <button 
+              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700" 
+              onClick={close}
+            >
               Close
             </button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
@@ -60,7 +96,7 @@ function PWABadge() {
 export default PWABadge;
 
 /**
- * This function will register a periodic sync check every hour, you can modify the interval as needed.
+ * Register periodic sync check - polls for updates at specified interval
  */
 function registerPeriodicSync(
   period: number,
@@ -69,17 +105,35 @@ function registerPeriodicSync(
 ) {
   if (period <= 0) return;
 
+  console.log(`Setting up periodic sync every ${period}ms`);
+
   setInterval(async () => {
-    if ("onLine" in navigator && !navigator.onLine) return;
+    // Skip if offline
+    if ("onLine" in navigator && !navigator.onLine) {
+      console.log('Skipping update check - offline');
+      return;
+    }
 
-    const resp = await fetch(swUrl, {
-      cache: "no-store",
-      headers: {
+    console.log('Checking for updates...');
+    
+    try {
+      const resp = await fetch(swUrl, {
         cache: "no-store",
-        "cache-control": "no-cache",
-      },
-    });
+        headers: {
+          cache: "no-store",
+          "cache-control": "no-cache",
+        },
+      });
 
-    if (resp?.status === 200) await r.update();
+      console.log('Update check response status:', resp?.status);
+
+      if (resp?.status === 200) {
+        console.log('Calling r.update()');
+        await r.update();
+        console.log('r.update() completed');
+      }
+    } catch (error) {
+      console.error('Failed to check for updates:', error);
+    }
   }, period);
 }
