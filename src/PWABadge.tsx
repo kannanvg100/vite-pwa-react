@@ -4,7 +4,7 @@ import { useRegisterSW } from "virtual:pwa-register/react";
 
 function PWABadge() {
   // check for updates every hour
-  const period = 30
+  const period = 30;
 
   const {
     offlineReady: [offlineReady, setOfflineReady],
@@ -31,19 +31,13 @@ function PWABadge() {
 
   return (
     <div className="mt-4" role="alert" aria-labelledby="toast-message">
-      {offlineReady && <p>offlineReady</p>}
-      {needRefresh && <p>needRefresh</p>}
-      {offlineReady || needRefresh ? (
-        <div className="PWABadge-toast">
-          <div className="PWABadge-message">
-            {offlineReady ? (
-              <span id="toast-message">App ready to work offline</span>
-            ) : (
-              <span id="toast-message">
-                New content available, click on reload button to update.
-              </span>
-            )}
-          </div>
+      {offlineReady && <p>offlineReady ready</p>}
+      {needRefresh && (
+        <>
+          <span id="toast-message">
+            New content available, click on reload button to update.
+          </span>
+
           <div className="PWABadge-buttons">
             {needRefresh && (
               <button
@@ -57,9 +51,7 @@ function PWABadge() {
               Close
             </button>
           </div>
-        </div>
-      ) : (
-        <p>No data</p>
+        </>
       )}
     </div>
   );
