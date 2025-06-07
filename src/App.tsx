@@ -2,18 +2,11 @@ import { useState, useEffect } from "react";
 import { Workbox } from "workbox-window";
 import UpdatePrompt from "./components/UpdatePrompt";
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
 function App() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(
     null
   );
-  // const [setInstallPrompt] =
-  //   useState<BeforeInstallPromptEvent | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
@@ -34,28 +27,13 @@ function App() {
       wb.register();
     }
 
-    // Handle install prompt
-    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
-      e.preventDefault();
-      // setInstallPrompt(e);
-    };
-
     // Handle online/offline status
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener(
-      "beforeinstallprompt",
-      handleBeforeInstallPrompt as EventListener
-    );
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt as EventListener
-      );
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
@@ -72,20 +50,6 @@ function App() {
     setUpdateAvailable(false);
   };
 
-  // const handleInstall = async () => {
-  //   if (installPrompt) {
-  //     await installPrompt.prompt();
-  //     const { outcome } = await installPrompt.userChoice;
-  //     if (outcome === "accepted") {
-  //       setInstallPrompt(null);
-  //     }
-  //   }
-  // };
-
-  // const handleDismissInstall = () => {
-  //   setInstallPrompt(null);
-  // };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Status Bar */}
@@ -101,7 +65,7 @@ function App() {
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            Vite v21
+            Vite v22
           </h1>
         </header>
 
@@ -144,33 +108,6 @@ function App() {
                 </span>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Demo Section */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Demo Actions
-          </h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              Reload App
-            </button>
-            <button
-              onClick={() => {
-                if ("caches" in window) {
-                  caches.keys().then((names) => {
-                    names.forEach((name) => caches.delete(name));
-                  });
-                }
-              }}
-              className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              Clear Cache
-            </button>
           </div>
         </div>
       </div>
